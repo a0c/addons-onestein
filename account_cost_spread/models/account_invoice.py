@@ -13,7 +13,6 @@ class AccountInvoice(models.Model):
         """
         When validating an invoice, already create spread lines for each
         invoice line.
-        TODO: Isn't this a bit much? Not all invoice lines needs spreading.
         """
         res = super(AccountInvoice, self).action_move_create()
         for this in self:
