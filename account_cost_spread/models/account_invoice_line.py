@@ -81,6 +81,7 @@ class AccountInvoiceLine(models.Model):
     def spread_details(self):
         """Button on the invoice lines tree view on the invoice
         form to show the spread form view."""
+        self.prohibit_spread_on_invoice_validated_without_spread_account()
         view_obj = self.env['ir.ui.view'].search([
             ('name', '=', 'account.invoice.line.spread'),
         ], limit=1)
@@ -100,6 +101,14 @@ class AccountInvoiceLine(models.Model):
             'res_id': self.id,
             }
         return view
+
+    def prohibit_spread_on_invoice_validated_without_spread_account(self):
+        if self.invoice_id.state in ('open', 'paid') and not self.spread_account_id:
+            # only allow spreading costs on invoice validation and not after invoice
+            # was validated, because validated invoice already generated AMLs on the
+            # wrong (original) account and not on the spread account
+            raise UserError(_("Cost spreading prohibited: Spread Account must've been "
+                              "specified on invoice line *before* invoice validation"))
 
     @api.model
     def move_line_get_item(self, line):
